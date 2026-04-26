@@ -38,6 +38,14 @@ class Transaction(SQLModel, table=True):
     date: datetime = Field(default_factory=datetime.utcnow)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
+class User(SQLModel, table=True):
+    id: Optional[str] = Field(default=None, primary_key=True) # Matches Supabase Auth ID
+    email: str = Field(index=True, unique=True)
+    full_name: Optional[str] = None
+    role: str = Field(default="attorney") # admin, attorney, secretary
+    escritorio_id: Optional[str] = Field(default=None) # For multi-tenancy
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
 class KnowledgeChunk(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     content: str

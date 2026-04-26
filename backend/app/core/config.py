@@ -25,6 +25,11 @@ class Settings(BaseSettings):
     EVOLUTION_API_KEY: str
     EVOLUTION_INSTANCE_NAME: str
     
+    # SUPABASE AUTH
+    SUPABASE_URL: Optional[str] = Field(default=None)
+    SUPABASE_KEY: Optional[str] = Field(default=None)
+    SUPABASE_JWT_SECRET: Optional[str] = Field(default=None)
+    
     # APP
     DEBUG: bool = True
     PORT: int = 8000

@@ -5,6 +5,21 @@ from backend.app.graph.state import AgentState
 
 router = APIRouter()
 
+from backend.app.services.auth_service import auth_service
+from pydantic import BaseModel
+from fastapi import HTTPException
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+@router.post("/auth/login")
+async def login(data: LoginRequest):
+    result = auth_service.sign_in(data.email, data.password)
+    if result:
+        return result
+    raise HTTPException(status_code=401, detail="Credenciais inválidas")
+
 @router.post("/chat")
 async def chat_endpoint(request: Request):
     data = await request.json()
