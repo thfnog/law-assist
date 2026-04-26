@@ -1,10 +1,13 @@
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, SystemMessage
 from backend.app.graph.state import AgentState
 from backend.app.core.config import settings
 import json
 
-llm = ChatOpenAI(api_key=settings.OPENAI_API_KEY, model="gpt-4o-mini")
+llm = ChatGroq(
+    api_key=settings.GROQ_API_KEY, 
+    model=settings.GROQ_MODEL_NAME
+)
 
 def intent_detector(state: AgentState) -> AgentState:
     """Detects user intent and extracts entities."""

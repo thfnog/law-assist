@@ -5,6 +5,8 @@ from typing import Optional
 class Settings(BaseSettings):
     # LLM
     OPENAI_API_KEY: str
+    GROQ_API_KEY: Optional[str] = Field(default=None)
+    GROQ_MODEL_NAME: str = Field(default="llama3-70b-8192")
     
     # DATABASE
     DATABASE_URL: str = Field(default="sqlite:///./lawassist.db", env="DATABASE_URL")

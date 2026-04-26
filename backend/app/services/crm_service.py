@@ -1,12 +1,16 @@
-import openai
+from langchain_groq import ChatGroq
 from backend.app.core.config import settings
 from backend.app.models.database import Lead, engine
 from sqlmodel import Session, select
 import json
+from langchain_core.messages import HumanMessage
 
 class CRMService:
     def __init__(self):
-        self.client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
+        self.llm = ChatGroq(
+            api_key=settings.GROQ_API_KEY, 
+            model=settings.GROQ_MODEL_NAME
+        )
 
     def extract_lead_info(self, text: str):
         """Uses AI to extract legal lead information from a message."""
@@ -27,12 +31,8 @@ class CRMService:
         """
         
         try:
-            response = self.client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": prompt}],
-                response_format={"type": "json_object"}
-            )
-            data = json.loads(response.choices[0].message.content)
+            response = self.llm.invoke([HumanMessage(content=prompt)])
+            data = json.loads(response.content.replace('```json', '').replace('```', '').strip())
             return data
         except Exception as e:
             print(f"Error in CRMService AI extraction: {e}")
