@@ -19,6 +19,7 @@ class Client(SQLModel, table=True):
 
 class Lead(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    escritorio_id: str = Field(foreign_key="escritorio.id")
     name: str
     phone: str = Field(index=True)
     legal_area: Optional[str] = None
@@ -29,6 +30,7 @@ class Lead(SQLModel, table=True):
 
 class Transaction(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    escritorio_id: str = Field(foreign_key="escritorio.id")
     client_id: Optional[int] = Field(default=None, foreign_key="client.id")
     lead_id: Optional[int] = Field(default=None, foreign_key="lead.id")
     type: str # income, expense
@@ -38,16 +40,25 @@ class Transaction(SQLModel, table=True):
     date: datetime = Field(default_factory=datetime.utcnow)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
+class Escritorio(SQLModel, table=True):
+    id: Optional[str] = Field(default=None, primary_key=True) # UUID
+    name: str
+    slug: str = Field(index=True, unique=True)
+    plan: str = Field(default="free")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
 class User(SQLModel, table=True):
     id: Optional[str] = Field(default=None, primary_key=True) # Matches Supabase Auth ID
     email: str = Field(index=True, unique=True)
     full_name: Optional[str] = None
-    role: str = Field(default="attorney") # admin, attorney, secretary
-    escritorio_id: Optional[str] = Field(default=None) # For multi-tenancy
+    role: str = Field(default="advogado") # dono, financeiro, advogado, atendente
+    escritorio_id: Optional[str] = Field(default=None, foreign_key="escritorio.id")
+    whatsapp_instance: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class KnowledgeChunk(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    escritorio_id: str = Field(foreign_key="escritorio.id")
     content: str
     metadata_json: str  # Extra info (source file, client name, etc)
     embedding: list[float] = Field(sa_column=Column(Vector(1536))) # OpenAI dimension
