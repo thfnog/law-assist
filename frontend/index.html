@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LawAssist AI - Workspace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
+        .message-user { background: #3b82f6; color: white; border-radius: 18px 18px 2px 18px; }
+        .message-bot { background: #f3f4f6; color: #1f2937; border-radius: 18px 18px 18px 2px; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="p-6 border-b bg-white/80 backdrop-blur-md sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">L</div>
+                <h1 class="text-xl font-semibold text-slate-800 tracking-tight">LawAssist AI</h1>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span class="text-sm font-medium text-slate-500">Sistema Ativo</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Chat Area -->
+    <main class="flex-grow overflow-y-auto p-4 md:p-8 space-y-6 max-w-4xl mx-auto w-full" id="chat-window">
+        <!-- Welcome Message -->
+        <div class="message-bot p-4 max-w-[80%] shadow-sm animate-fade-in">
+            <p>Olá! Sou o assistente jurídico da LawAssist. Como posso ajudar hoje?</p>
+            <div class="mt-3 flex flex-wrap gap-2">
+                <button onclick="quickAction('Criar cliente João Silva')" class="text-xs bg-white border border-slate-200 px-3 py-1.5 rounded-full hover:bg-slate-50 transition-colors">"Criar cliente João Silva"</button>
+                <button onclick="quickAction('Buscar João Silva')" class="text-xs bg-white border border-slate-200 px-3 py-1.5 rounded-full hover:bg-slate-50 transition-colors">"Buscar João Silva"</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Input -->
+    <footer class="p-6 bg-white border-t sticky bottom-0">
+        <div class="max-w-4xl mx-auto relative">
+            <input type="text" id="user-input" placeholder="Digite seu comando (Ex: Criar cliente João Silva)..." 
+                class="w-full pl-6 pr-12 py-4 bg-slate-100 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-slate-700">
+            <button onclick="sendMessage()" class="absolute right-3 top-2.5 p-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="Wait12 19l9-7-9-7v14z" />
+                </svg>
+            </button>
+        </div>
+        <p class="text-center text-[10px] text-slate-400 mt-4 uppercase tracking-widest font-semibold">LawAssist MVP v1.0 • Processamento Seguro</p>
+    </footer>
+
+    <script>
+        const chatWindow = document.getElementById('chat-window');
+        const userInput = document.getElementById('user-input');
+
+        userInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        function quickAction(text) {
+            userInput.value = text;
+            sendMessage();
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // Add user message to UI
+            addMessage(text, 'user');
+            userInput.value = '';
+
+            // Loading state
+            const loadingId = addMessage('Processando...', 'bot', true);
+
+            try {
+                const response = await fetch('http://localhost:8000/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+                const data = await response.json();
+                
+                // Update bot message
+                updateMessage(loadingId, data.response);
+            } catch (error) {
+                updateMessage(loadingId, '⚠️ Erro ao conectar com o servidor. Verifique se o backend está rodando.');
+                console.error(error);
+            }
+        }
+
+        function addMessage(text, sender, isLoading = false) {
+            const id = Date.now();
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = `p-4 max-w-[80%] shadow-sm animate-fade-in ${sender === 'user' ? 'message-user ml-auto' : 'message-bot'}`;
+            
+            // Format text (handle newlines)
+            const formattedText = text.replace(/\n/g, '<br>');
+            div.innerHTML = `<p>${formattedText}</p>`;
+            
+            chatWindow.appendChild(div);
+            window.scrollTo(0, document.body.scrollHeight);
+            return id;
+        }
+
+        function updateMessage(id, text) {
+            const div = document.getElementById(id);
+            if (div) {
+                const formattedText = text.replace(/\n/g, '<br>');
+                div.innerHTML = `<p>${formattedText}</p>`;
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        }
+    </script>
+</body>
+</html>
