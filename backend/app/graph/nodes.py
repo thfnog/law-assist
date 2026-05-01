@@ -132,7 +132,8 @@ from backend.app.services.knowledge_service import knowledge_service
 def knowledge_retriever(state: AgentState) -> AgentState:
     """Searches the knowledge base and injects context into the result."""
     user_input = state["user_input"]
-    results = knowledge_service.similarity_search(user_input)
+    escritorio_id = state.get("escritorio_id")
+    results = knowledge_service.similarity_search(escritorio_id, user_input)
     
     if results:
         context = "\n\n".join([f"--- Contexto de {json.loads(r.metadata_json).get('file_name', 'Documento')}: ---\n{r.content}" for r in results])

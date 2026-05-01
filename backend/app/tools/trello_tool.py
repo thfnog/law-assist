@@ -56,4 +56,30 @@ class TrelloTool:
         except Exception:
             return []
 
+    def get_cards_from_list(self, list_id):
+        """Fetches all cards from a specific Trello list."""
+        url = f"{self.base_url}/lists/{list_id}/cards"
+        try:
+            response = requests.get(url, params=self.auth_params)
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            print(f"Trello get_cards error: {e}")
+            return []
+
+    def move_card(self, card_id, new_list_id):
+        """Moves a card to a different list."""
+        url = f"{self.base_url}/cards/{card_id}"
+        params = {
+            **self.auth_params,
+            'idList': new_list_id
+        }
+        try:
+            response = requests.put(url, params=params)
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            print(f"Trello move_card error: {e}")
+            return None
+
 trello_tool = TrelloTool()

@@ -17,12 +17,14 @@ class Settings(BaseSettings):
     TRELLO_BOARD_ID: str
     TRELLO_LIST_ID_CLIENTS: str
     
-    # GOOGLE
     GOOGLE_SERVICE_ACCOUNT_FILE: str = "service-account.json"
+    GOOGLE_CLIENT_ID: Optional[str] = Field(default=None)
+    GOOGLE_CLIENT_SECRET: Optional[str] = Field(default=None)
     GOOGLE_DRIVE_PARENT_FOLDER_ID: str
     GOOGLE_DOCS_CONTRACT_TEMPLATE_ID: str
     
-    # EVOLUTION API
+    # APP
+    APP_URL: str = Field(default="http://localhost:8000")
     EVOLUTION_API_URL: str
     EVOLUTION_API_KEY: str
     EVOLUTION_INSTANCE_NAME: str

@@ -20,6 +20,17 @@ async def login(data: LoginRequest):
         return result
     raise HTTPException(status_code=401, detail="Credenciais inválidas")
 
+from backend.app.services.google_auth_service import google_auth_service
+
+@router.get("/auth/google/login")
+async def google_login(escritorio_id: str):
+    return {"url": google_auth_service.get_authorization_url(escritorio_id)}
+
+@router.get("/auth/google/callback")
+async def google_callback(code: str, state: str):
+    # state is the escritorio_id
+    return google_auth_service.handle_callback(code, state)
+
 @router.post("/chat")
 async def chat_endpoint(request: Request):
     data = await request.json()
@@ -84,3 +95,24 @@ async def process_whatsapp_message(sender: str, text: str):
     
     # Send response back to user
     whatsapp_tool.send_message(sender, response_text)
+
+# --- Trello Integration ---
+from backend.app.tools.trello_tool import trello_tool
+from backend.app.core.config import settings
+
+@router.get("/trello/kanban")
+async def get_kanban_cards():
+    """Returns cards from the main clients list."""
+    list_id = settings.TRELLO_LIST_ID_CLIENTS
+    cards = trello_tool.get_cards_from_list(list_id)
+    return {"cards": cards}
+
+@router.post("/trello/move")
+async def move_trello_card(data: dict):
+    """Moves a card to a new list/status."""
+    card_id = data.get("card_id")
+    new_list_id = data.get("new_list_id")
+    result = trello_tool.move_card(card_id, new_list_id)
+    if result:
+        return {"status": "success"}
+    raise HTTPException(status_code=400, detail="Erro ao mover card no Trello")

@@ -9,6 +9,7 @@ import {
   Users, 
   Briefcase, 
   Wallet, 
+  Share2,
   Settings, 
   LogOut, 
   Menu,
@@ -42,6 +43,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: 'Clientes', icon: Users, path: '/dashboard/clients', roles: ['dono', 'advogado', 'atendente'] },
     { name: 'Processos', icon: Briefcase, path: '/dashboard/cases', roles: ['dono', 'advogado'] },
     { name: 'Financeiro', icon: Wallet, path: '/dashboard/finance', roles: ['dono', 'financeiro'] },
+    { name: 'Integrações', icon: Share2, path: '/dashboard/integrations', roles: ['dono'] },
     { name: 'Configurações', icon: Settings, path: '/dashboard/settings', roles: ['dono'] },
   ];
 

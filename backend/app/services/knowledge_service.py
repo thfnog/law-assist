@@ -60,7 +60,7 @@ class KnowledgeService:
         )
         return response.choices[0].message.content
 
-    def ingest_file(self, file_name, file_content, mime_type, metadata):
+    def ingest_file(self, escritorio_id, file_name, file_content, mime_type, metadata):
         """Parses, splits, embeds and stores file content."""
         text = ""
         if "pdf" in mime_type:
@@ -81,6 +81,7 @@ class KnowledgeService:
             for chunk in chunks:
                 embedding = self.get_embedding(chunk)
                 new_chunk = KnowledgeChunk(
+                    escritorio_id=escritorio_id,
                     content=chunk,
                     metadata_json=json.dumps({**metadata, "file_name": file_name}),
                     embedding=embedding
@@ -88,14 +89,15 @@ class KnowledgeService:
                 session.add(new_chunk)
             session.commit()
 
-    def similarity_search(self, query, limit=5):
-        """Finds most relevant knowledge chunks."""
+    def similarity_search(self, escritorio_id, query, limit=5):
+        """Finds most relevant knowledge chunks for a specific office."""
         query_embedding = self.get_embedding(query)
         
         with Session(engine) as session:
-            # Using pgvector L2 distance operator (<->) or Cosine distance (<=>)
-            # SQLAlchemy/SQLModel syntax for pgvector:
-            statement = select(KnowledgeChunk).order_by(KnowledgeChunk.embedding.l2_distance(query_embedding)).limit(limit)
+            statement = select(KnowledgeChunk)\
+                .where(KnowledgeChunk.escritorio_id == escritorio_id)\
+                .order_by(KnowledgeChunk.embedding.l2_distance(query_embedding))\
+                .limit(limit)
             results = session.exec(statement).all()
             return results
 
